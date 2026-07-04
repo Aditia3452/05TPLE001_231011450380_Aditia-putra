@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Sederhana</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  .calculator {
+    width: 320px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    padding: 16px;
+  }
+  .display {
+    background: #222;
+    border-radius: 8px;
+    padding: 16px 12px;
+    text-align: right;
+    margin-bottom: 12px;
+    min-height: 64px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+  }
+  .display .prev {
+    font-size: 13px;
+    color: #aaa;
+    min-height: 16px;
+  }
+  .display .current {
+    font-size: 28px;
+    font-weight: bold;
+    color: #fff;
+    word-break: break-all;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  button {
+    padding: 16px 0;
+    font-size: 18px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #eee;
+    color: #222;
+    transition: background 0.15s;
+  }
+  button:hover { background: #ddd; }
+  button:active { background: #ccc; }
+  button.op {
+    background: #e6f1fb;
+    color: #185fa5;
+  }
+  button.op:hover { background: #cde3f7; }
+  button.eq {
+    background: #222;
+    color: #fff;
+    grid-column: span 1;
+  }
+  button.eq:hover { background: #000; }
+  button.wide {
+    grid-column: span 2;
+  }
+</style>
+</head>
+<body>
+
+<div class="calculator">
+  <div class="display">
+    <div class="prev" id="calc-prev"></div>
+    <div class="current" id="calc-display">0</div>
+  </div>
+  <div class="grid" id="calc-grid"></div>
+</div>
+
+<script>
+(function(){
+  const buttons = [
+    ['C','op'], ['⌫','op'], ['%','op'], ['÷','op'],
+    ['7','num'], ['8','num'], ['9','num'], ['×','op'],
+    ['4','num'], ['5','num'], ['6','num'], ['−','op'],
+    ['1','num'], ['2','num'], ['3','num'], ['+','op'],
+    ['0','num-wide'], ['.','num'], ['=','eq']
+  ];
+
+  const grid = document.getElementById('calc-grid');
+  const display = document.getElementById('calc-display');
+  const prevDisplay = document.getElementById('calc-prev');
+
+  let current = '0';
+  let previous = null;
+  let operator = null;
+  let justEvaluated = false;
+
+  function render() {
+    display.textContent = current;
+    prevDisplay.textContent = previous !== null && operator ? `${previous} ${operator}` : '';
+  }
+
+  function calculate(a, b, op) {
+    a = parseFloat(a); b = parseFloat(b);
+    let result;
+    switch(op) {
+      case '+': result = a + b; break;
+      case '−': result = a - b; break;
+      case '×': result = a * b; break;
+      case '÷': result = b === 0 ? NaN : a / b; break;
+      default: return b;
+    }
+    if (isNaN(result)) return 'Error';
+    result = Math.round(result * 1e10) / 1e10;
+    return result.toString();
+  }
+
+  function pressNum(n) {
+    if (justEvaluated) {
+      current = n === '.' ? '0.' : n;
+      justEvaluated = false;
+    } else if (current === '0' && n !== '.') {
+      current = n;
+    } else if (n === '.' && current.includes('.')) {
+      return;
+    } else {
+      current += n;
+    }
+    render();
+  }
+
+  function pressOp(label) {
+    if (label === 'C') {
+      current = '0'; previous = null; operator = null; justEvaluated = false;
+      render();
+      return;
+    }
+    if (label === '⌫') {
+      current = current.length > 1 ? current.slice(0, -1) : '0';
+      render();
+      return;
+    }
+    if (label === '%') {
+      current = (parseFloat(current) / 100).toString();
+      render();
+      return;
+    }
+    if (previous !== null && operator && !justEvaluated) {
+      current = calculate(previous, current, operator);
+    }
+    previous = current;
+    operator = label;
+    justEvaluated = true;
+    render();
+  }
+
+  function pressEq() {
+    if (operator === null || previous === null) return;
+    current = calculate(previous, current, operator);
+    previous = null;
+    operator = null;
+    justEvaluated = true;
+    render();
+  }
+
+  buttons.forEach(([label, type]) => {
+    const btn = document.createElement('button');
+    btn.textContent = label;
+    btn.setAttribute('aria-label', label);
+    if (type === 'num-wide') btn.classList.add('wide');
+    if (type === 'op') btn.classList.add('op');
+    if (type === 'eq') btn.classList.add('eq');
+    btn.addEventListener('click', () => {
+      if (type === 'num' || type === 'num-wide') pressNum(label);
+      else if (type === 'op') pressOp(label);
+      else if (type === 'eq') pressEq();
+    });
+    grid.appendChild(btn);
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
