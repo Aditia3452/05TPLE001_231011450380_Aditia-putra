@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Pemilihan SWITCH</title>
+</head>
+<body>
+
+<h2>Contoh SWITCH</h2>
+<p id="hasil"></p>
+
+<script>
+    let hari = 3;
+    let namaHari;
+
+    switch (hari) {
+        case 1:
+            namaHari = "Senin";
+            break;
+        case 2:
+            namaHari = "Selasa";
+            break;
+        case 3:
+            namaHari = "Rabu";
+            break;
+        case 4:
+            namaHari = "Kamis";
+            break;
+        case 5:
+            namaHari = "Jumat";
+            break;
+        case 6:
+            namaHari = "Sabtu";
+            break;
+        case 7:
+            namaHari = "Minggu";
+            break;
+        default:
+            namaHari = "Hari tidak valid";
+    }
+
+    document.getElementById("hasil").innerHTML = "Hari ini adalah " + namaHari;
+</script>
+
+</body>
+</html>
